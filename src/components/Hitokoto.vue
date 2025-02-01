@@ -41,7 +41,7 @@ const openMusicShow = ref(false);
 // 一言数据
 const hitokotoData = reactive({
   text: "这里应该显示一句话",
-  from: "無名",
+  from: "liwezee",
 });
 
 // 获取一言数据

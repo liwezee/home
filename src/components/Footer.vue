@@ -23,7 +23,7 @@
         <!-- 站点备案 -->
         <span>
           &amp;
-          <a v-if="siteIcp" href="https://beian.miit.gov.cn" target="_blank">
+          <a v-if="siteIcp" href="https://icp.gov.moe/?keyword=20222216" target="_blank">
             {{ siteIcp }}
           </a>
         </span>
