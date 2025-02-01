@@ -15,13 +15,18 @@
     "link": "https://nav.liwezee.cn/"
   },
   {
-    "icon": "LaptopCode",
-    "name": "站点监测",
-    "link": "https://status.liwezee.cn/"
-  },
-  {
     "icon": "ShoppingBag",
     "name": "爱发电",
     "link": "https://afdian.com/a/liwezee"
+  },
+  {
+    "icon": "Music",
+    "name": "音乐",
+    "link": ""
+  },
+  {
+    "icon": "LaptopCode",
+    "name": "站点监测",
+    "link": "https://status.liwezee.cn/"
   }
 ]
