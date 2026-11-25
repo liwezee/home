@@ -6,7 +6,7 @@
       class="bg"
       alt="cover"
       @load="imgLoadComplete"
-      @error.once="imgLoadError"
+      @error="imgLoadError"
       @animationend="imgAnimationEnd"
     />
     <div :class="store.backgroundShow ? 'gray hidden' : 'gray'" />
@@ -30,27 +30,27 @@ import { Error } from "@icon-park/vue-next";
 const store = mainStore();
 const bgUrl = ref(null);
 const imgTimeout = ref(null);
+const loadSafetyTimeout = ref(null);
 const emit = defineEmits(["loadComplete"]);
 
-// 壁纸随机数
-// 请依据文件夹内的图片个数修改 Math.random() 后面的第一个数字
-const bgRandom = Math.floor(Math.random() * 10 + 1);
+// 各壁纸类型对应的图源（均已验证可达）
+// 0 默认壁纸：风景大图；1 每日一图：必应每日一图；2 随机风景：随机摄影；3 随机动漫：萌系动漫
+const WALLPAPERS = {
+  0: "https://t.alcy.cc/fj",
+  1: "https://bing.biturl.top/?resolution=1920&format=image",
+  2: "https://picsum.photos/1920/1080",
+  3: "https://t.alcy.cc/moe",
+};
+const FALLBACK_BG = WALLPAPERS[0];
 
 // 更换壁纸链接
 const changeBg = (type) => {
-  if (type == 0) {
-    bgUrl.value = "https://t.alcy.cc/fj";
-  } else if (type == 1) {
-    bgUrl.value = "https://t.alcy.cc/fj";
-  } else if (type == 2) {
-    bgUrl.value = "https://t.alcy.cc/fj";
-  } else if (type == 3) {
-    bgUrl.value = "https://t.alcy.cc/fj";
-  }
+  bgUrl.value = WALLPAPERS[type] ?? FALLBACK_BG;
 };
 
 // 图片加载完成
 const imgLoadComplete = () => {
+  clearTimeout(loadSafetyTimeout.value);
   imgTimeout.value = setTimeout(
     () => {
       store.setImgLoadStatus(true);
@@ -69,14 +69,19 @@ const imgAnimationEnd = () => {
 // 图片显示失败
 const imgLoadError = () => {
   console.error("壁纸加载失败：", bgUrl.value);
-  ElMessage({
-    message: "壁纸加载失败，已临时切换回默认",
-    icon: h(Error, {
-      theme: "filled",
-      fill: "#efefef",
-    }),
-  });
-  bgUrl.value = "https://t.alcy.cc/fj";
+  // 首次失败：切回默认图源再试一次；默认图源也失败则直接放行，不卡加载屏
+  if (bgUrl.value !== FALLBACK_BG) {
+    ElMessage({
+      message: "壁纸加载失败，已临时切换回默认",
+      icon: h(Error, {
+        theme: "filled",
+        fill: "#efefef",
+      }),
+    });
+    bgUrl.value = FALLBACK_BG;
+  } else {
+    store.setImgLoadStatus(true);
+  }
 };
 
 // 监听壁纸切换
@@ -90,10 +95,15 @@ watch(
 onMounted(() => {
   // 加载壁纸
   changeBg(store.coverType);
+  // 兜底：壁纸 8 秒未加载出也不卡住加载屏
+  loadSafetyTimeout.value = setTimeout(() => {
+    store.setImgLoadStatus(true);
+  }, 8000);
 });
 
 onBeforeUnmount(() => {
   clearTimeout(imgTimeout.value);
+  clearTimeout(loadSafetyTimeout.value);
 });
 </script>
 

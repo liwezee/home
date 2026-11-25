@@ -83,17 +83,40 @@ const listHeight = computed(() => {
   return props.listMaxHeight + "px";
 });
 
+// 解码歌词：博客端歌词接口返回的是 JSON 编码的字符串
+// （形如 "[00:14.74]\u5b81\u613f..."，含字面 \u 转义与 \n），直接交给 APlayer 会原样显示转义符
+// 先取回并 JSON 解码成纯 LRC 文本，再以 Blob 地址交给播放器；解码失败则沿用原地址
+const decodeLrc = async (lrcUrl) => {
+  try {
+    const res = await fetch(lrcUrl);
+    let text = (await res.text()).trim();
+    if (text.startsWith('"')) {
+      text = JSON.parse(text);
+    }
+    return URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+  } catch (e) {
+    console.warn("歌词解码失败，沿用原地址：", lrcUrl, e);
+    return lrcUrl;
+  }
+};
+
 // 初始化播放器
 onMounted(() => {
   nextTick(() => {
-    // 歌单接口失败时给出提示，而不是静默失败导致播放器入口一直不出现
     getPlayerList(props.songServer, props.songType, props.songId)
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
         // 更改播放器加载状态
         store.musicIsOk = true;
-        // 生成歌单
-        playList.value = res;
+        // 解码每首歌的歌词后再生成歌单
+        playList.value = await Promise.all(
+          res.map(async (song) => {
+            if (song.lrc) {
+              song.lrc = await decodeLrc(song.lrc);
+            }
+            return song;
+          }),
+        );
         console.log("音乐加载完成");
         console.log(playList.value);
         console.log(playIndex.value, playList.value.length, props.volume);
@@ -115,6 +138,7 @@ onMounted(() => {
 
 // 播放
 const onPlay = () => {
+  if (!player.value) return;
   console.log("播放");
   playIndex.value = player.value.aplayer.index;
   // 播放状态
@@ -133,11 +157,13 @@ const onPlay = () => {
 
 // 暂停
 const onPause = () => {
+  if (!player.value) return;
   store.setPlayerState(player.value.audioRef.paused);
 };
 
 // 音频时间更新事件
 const onTimeUp = () => {
+  if (!player.value) return;
   let lyrics = player.value.aplayer.lyrics[playIndex.value];
   let lyricIndex = player.value.aplayer.lyricIndex;
   if (!lyrics || !lyrics[lyricIndex]) {
@@ -154,24 +180,30 @@ const onTimeUp = () => {
 
 // 切换播放暂停事件
 const playToggle = () => {
+  if (!player.value) return;
   player.value.toggle();
 };
 
 // 切换音量事件
 const changeVolume = (value) => {
+  if (!player.value) return;
   player.value.setVolume(value, false);
 };
 
 // 切换上下曲
 const changeSong = (type) => {
+  if (!player.value) return;
   type === 0 ? player.value.skipBack() : player.value.skipForward();
   nextTick(() => {
-    player.value.play();
+    if (player.value) {
+      player.value.play();
+    }
   });
 };
 
 // 切换歌曲列表状态
 const toggleList = () => {
+  if (!player.value) return;
   player.value.toggleList();
 };
 
@@ -192,9 +224,8 @@ const loadMusicError = () => {
       duration: 2000,
     }),
   });
-  console.error(
-    "播放歌曲: " + player.value.aplayer.audio[player.value.aplayer.index].name + " 出现错误",
-  );
+  const audio = player.value?.aplayer?.audio?.[player.value.aplayer.index];
+  console.error("播放歌曲: " + (audio ? audio.name : "未知") + " 出现错误");
 };
 
 // 暴露子组件方法

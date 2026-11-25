@@ -79,9 +79,6 @@
           </el-radio-group>
         </div>
       </el-collapse-item>
-      <el-collapse-item title="其他设置" name="4">
-        <div>设置内容待增加</div>
-      </el-collapse-item>
     </el-collapse>
   </div>
 </template>
