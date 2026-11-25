@@ -5,6 +5,9 @@
   "home": "https://imsyy.top",
   "private": true,
   "version": "4.1.4",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite --host",
