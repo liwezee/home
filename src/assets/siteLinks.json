@@ -5,11 +5,6 @@
     "link": "https://blog.liwezee.cn/"
   },
   {
-    "icon": "Cloud",
-    "name": "网盘",
-    "link": "https://pan.liwezee.cn/"
-  },
-  {
     "icon": "Compass",
     "name": "起始页",
     "link": "https://nav.liwezee.cn/"
@@ -18,10 +13,5 @@
     "icon": "ShoppingBag",
     "name": "爱发电",
     "link": "https://afdian.com/a/liwezee"
-  },
-  {
-    "icon": "LaptopCode",
-    "name": "站点监测",
-    "link": "https://status.liwezee.cn/"
   }
 ]

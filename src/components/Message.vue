@@ -25,6 +25,10 @@
           <QuoteRight />
         </Icon>
       </div>
+      <!-- 点击简介卡片可打开时光胶囊，之前没有任何提示 -->
+      <div v-show="!store.boxOpenState && store.getInnerWidth >= 721" class="box-hint">
+        点击查看时光胶囊
+      </div>
     </div>
   </div>
 </template>
@@ -161,6 +165,12 @@ watch(
         align-self: flex-end;
       }
     }
+    .box-hint {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      text-align: center;
+    }
     @media (max-width: 720px) {
       max-width: 100%;
       pointer-events: none;
@@ -178,15 +188,17 @@ watch(
   //       transform: none;
   //       text-align: center;
   //       .bg {
-  //         font-size: 3.5rem;
+  //         font-size: 5rem;
   //       }
   //       .sm {
-  //         font-size: 1.4rem;
+  //         font-size: 2rem;
   //       }
   //     }
   //   }
   //   .description {
   //     margin-top: 2.5rem;
+  //     max-width: 100%;
+  //     pointer-events: none;
   //   }
   // }
 }

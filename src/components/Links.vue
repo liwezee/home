@@ -12,11 +12,15 @@
       :modules="[Pagination, Mousewheel]"
       :slides-per-view="1"
       :space-between="40"
-      :pagination="{
-        el: '.swiper-pagination',
-        clickable: true,
-        bulletElement: 'div',
-      }"
+      :pagination="
+        siteLinksList.length > 1
+          ? {
+              el: '.swiper-pagination',
+              clickable: true,
+              bulletElement: 'div',
+            }
+          : false
+      "
       :mousewheel="true"
     >
       <SwiperSlide v-for="site in siteLinksList" :key="site">
@@ -35,7 +39,7 @@
           </el-col>
         </el-row>
       </SwiperSlide>
-      <div class="swiper-pagination" />
+      <div v-if="siteLinksList.length > 1" class="swiper-pagination" />
     </Swiper>
   </div>
 </template>

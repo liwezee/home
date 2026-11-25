@@ -86,8 +86,9 @@ const listHeight = computed(() => {
 // 初始化播放器
 onMounted(() => {
   nextTick(() => {
-    try {
-      getPlayerList(props.songServer, props.songType, props.songId).then((res) => {
+    // 歌单接口失败时给出提示，而不是静默失败导致播放器入口一直不出现
+    getPlayerList(props.songServer, props.songType, props.songId)
+      .then((res) => {
         console.log(res);
         // 更改播放器加载状态
         store.musicIsOk = true;
@@ -96,19 +97,19 @@ onMounted(() => {
         console.log("音乐加载完成");
         console.log(playList.value);
         console.log(playIndex.value, playList.value.length, props.volume);
+      })
+      .catch((err) => {
+        console.error(err);
+        store.musicIsOk = false;
+        ElMessage({
+          message: "播放器加载失败",
+          grouping: true,
+          icon: h(PlayWrong, {
+            theme: "filled",
+            fill: "#efefef",
+          }),
+        });
       });
-    } catch (err) {
-      console.error(err);
-      store.musicIsOk = false;
-      ElMessage({
-        message: "播放器加载失败",
-        grouping: true,
-        icon: h(PlayWrong, {
-          theme: "filled",
-          fill: "#efefef",
-        }),
-      });
-    }
   });
 });
 
